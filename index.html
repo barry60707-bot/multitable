@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百家樂遊戲介面 - 終極四桌獨立圖片版</title>
+    <style>
+        /* ==========================================================================
+           🔴🔴🔴 【圖片與顏色替換總導覽區】 🔴🔴🔴
+           提示：A、B、C、D 四張桌子在「主桌位置」與「小桌位置」的圖片已全部獨立拆開。
+           ========================================================================== */
+        
+        /* ==========================================================================
+           【新樣式】子桌下注額 - 三格獨立灰底外框
+           ========================================================================== */
+        .small-table-bets {
+            display: flex;
+            gap: 130px;            /* 三個數字格子之間的左右間距 */
+            margin-top: -20px;     /* 與上方「桌號」文字的上下距離 */
+            position: relative;
+            z-index: 10;         /* 確保絕對飄在桌子背景圖的最上面 */
+        }
+
+        /* 🔴 核心修正：提高權重，確保絕對能覆蓋下方的 display: flex */
+        .quick-actions.hide-auto-actions {
+            display: none !important;
+        }
+
+        .small-bet-val {
+            background: rgba(0, 0, 0, 0.65); /* 完美複製主桌的灰黑半透明底色 */
+            padding: 2px 10px;               /* 格子的上下左右內襯大小 */
+            border-radius: 6px;              /* 圓角 */
+            font-size: 13px;                 /* 子桌專用精緻小字體 */
+            font-weight: bold;
+            min-width: 42px;                 /* 固定最小寬度，防止金額變長時格子忽大忽小變形 */
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4); /* 加上微陰影提升立體感 */
+        }
+
+        /* 數字文字顏色區分 */
+        .small-bet-val.p-color { color: #FFFFFF; }
+        .small-bet-val.t-color { color: #FFFFFF; }
+        .small-bet-val.b-color { color: #FFFFFF; }
+
+        /* 額外優化：稍微讓桌號標題浮現，避免被荷官衣服吃掉 */
+        .small-table-title {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-table-container[data-table="A"][data-state="normal"] { 
+            background-color: #0c4e2b;
+            background-image: url('桌子_綠.png'); background-size: 100% 100%;
+        }
+        .main-table-container[data-table="A"][data-state="auto"] { 
+            background-color: #11693b; 
+            background-image: url('桌子_綠_自動.png'); background-size: 100% 100%;
+        }
+        .main-table-container[data-table="A"][data-state="action"] { 
+            background-color: #5a1212; border-color: #ff3333; box-shadow: 0 0 20px #ff3333;
+            background-image: url('桌子_綠_操作.png'); background-size: 100% 100%;
+        }
+        .small-table-body[data-table="A"][data-state="normal"] { 
+            background-color: #164e34; 
+            background-image: url('桌子_綠.png'); background-size: cover;
+        }
+        .small-table-body[data-table="A"][data-state="auto"] { 
+            background-color: #0d3824; 
+            background-image: url('桌子_綠_自動.png'); background-size: cover;
+        }
+        .small-table-body[data-table="A"][data-state="action"] { 
+            background-color: #4a1515; 
+            background-image: url('桌子_綠_操作_子桌.png'); background-size: cover;
+        }
+
+        /* ==========================================
+           【桌號 B】專屬外觀
+           ========================================== */
+        .main-table-container[data-table="B"][data-state="normal"] { 
+            background-color: #0f2a4a; 
+            background-image: url('桌子_橘.png'); background-size: 100% 100%;
+        }
+        .main-table-container[data-table="B"][data-state="auto"] { 
+            background-color: #163e6d; 
+            background-image: url('桌子_橘_自動.png'); background-size: 100% 100%;
+        }
+        .main-table-container[data-table="B"][data-state="action"] { 
+            background-color: #5a1212; border-color: #ff3333; box-shadow: 0 0 20px #ff3333;
+            background-image: url('桌子_橘_操作.png'); background-size: 100% 100%;
+        }
+        .small-table-body[data-table="B"][data-state="normal"] { 
+            background-color: #17375e; 
+            background-image: url('桌子_橘.png'); background-size: cover;
+        }
+        .small-table-body[data-table="B"][data-state="auto"] { 
+            background-color: #0f2642; 
+            background-image: url('桌子_橘_自動.png'); background-size: cover;
+        }
+        .small-table-body[data-table="B"][data-state="action"] { 
+            background-color: #4a1515; 
+            background-image: url('桌子_橘_操作_子桌.png'); background-size: cover;
+        }
+
+        /* ==========================================
+           【桌號 C】專屬外觀
+           ========================================== */
+        .main-table-container[data-table="C"][data-state="normal"] { 
+            background-color: #32164d; 
+            background-image: url('桌子_藍.png'); background-size: 100% 100%;
+        }
+        .main-table-container[data-table="C"][data-state="auto"] { 
+            background-color: #4a2072; 
+            background-image: url('桌子_藍_自動.png'); background-size: 100% 100%;
+        }
+        .main-table-container[data-table="C"][data-state="action"] { 
+            background-color: #5a1212; border-color: #ff3333; box-shadow: 0 0 20px #ff3333;
+            background-image: url('桌子_藍_操作.png'); background-size: 100% 100%;
+        }
+        .small-table-body[data-table="C"][data-state="normal"] { 
+            background-color: #3b1d54; 
+            background-image: url('桌子_藍.png'); background-size: cover;
+        }
+        .small-table-body[data-table="C"][data-state="auto"] { 
+            background-color: #241135; 
+            background-image: url('桌子_藍_自動.png'); background-size: cover;
+        }
+        .small-table-body[data-table="C"][data-state="action"] { 
+            background-color: #4a1515; 
+            background-image: url('桌子_藍_操作_子桌.png'); background-size: cover;
+        }
+
+        /* ==========================================
+           【桌號 D】專屬外觀
+           ========================================== */
+        .main-table-container[data-table="D"][data-state="normal"] { 
+            background-color: #4d2316; 
+            background-image: url('桌子_紫.png'); background-size: 100% 100%;
+        }
+        .main-table-container[data-table="D"][data-state="auto"] { 
+            background-color: #723421;
+            background-image: url('桌子_紫_自動.png'); background-size: 100% 100%; 
+        }
+        .main-table-container[data-table="D"][data-state="action"] { 
+            background-color: #5a1212; border-color: #ff3333; box-shadow: 0 0 20px #ff3333;
+            background-image: url('桌子_紫_操作.png.png'); background-size: 100% 100%;
+        }
+        .small-table-body[data-table="D"][data-state="normal"] { 
+            background-color: #52271b; 
+            background-image: url('桌子_紫.png'); background-size: cover;
+        }
+        .small-table-body[data-table="D"][data-state="auto"] { 
+            background-color: #331811; 
+            background-image: url('桌子_紫_自動.png'); background-size: cover;
+        }
+        .small-table-body[data-table="D"][data-state="action"] { 
+            background-color: #4a1515; 
+            background-image: url('桌子_紫_操作_子桌.png'); background-size: cover;
+        }
+
+        /* ==========================================================================
+           【子桌最上方快速下注按鈕 (閒、和、莊) 圖片區】
+           ========================================================================== */
+        .quick-btn.p-btn { background-color: transparent;  background-image: url('按鍵_閒.png');  }
+        .quick-btn.t-btn { background-color: transparent;  background-image: url('按鍵_和.png');  }
+        .quick-btn.b-btn { background-color: transparent;  background-image: url('按鍵_莊.png');  }
+
+        /* ==========================================================================
+           以下為系統核心結構佈局
+           ========================================================================== */
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #1a1a1a; color: #fff;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+        }
+        .game-container { flex: 1; display: flex; flex-direction: column; padding: 15px; position: relative; }
+        .tables-layout { flex: 1; display: flex; gap: 20px; min-height: 0; padding-bottom: 20px; }
+        
+        .main-table-container {
+            flex: 7; border: 4px solid #d4af37; border-radius: 15px;
+            display: flex; flex-direction: column; padding: 20px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.6); transition: all 0.3s ease;
+        }
+        .main-table-header { font-size: 26px; font-weight: bold; color: #d4af37; text-align: center; margin-bottom: 20px; }
+        .main-betting-areas { flex: 1; display: flex; gap: 15px; margin-top: -100px;}
+        
+        /* 移除主桌下注區的縱向虛線，並保持點擊範圍 */
+        .bet-zone {
+            flex: 1; 
+            border: none !important; 
+            outline: none !important;
+            border-radius: 10px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-size: 32px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+        }
+        .bet-zone:hover { background-color: rgba(255,255,255,0.1); }
+        .bet-zone.player { color: #3a86ff; }
+        .bet-zone.tie { color: #06d6a0; }
+        .bet-zone.banker { color: #ef476f; }
+        .bet-amount {
+            font-size: 20px; color: #fff; margin-top: 10px;
+            background: rgba(0,0,0,0.6); padding: 2px 12px; border-radius: 10px;
+        }
+
+        .small-tables-container { flex: 3; display: flex; flex-direction: column; gap: 15px; margin-bottom: 130px; }
+        
+        /* 格子老爸：做為按鈕的定位基準點 */
+        .small-table-slot {
+            position: relative !important;
+            flex: 1; background-color: #14213d; border: 2px solid #4a4a4a;
+            border-radius: 10px; display: flex; flex-direction: column; overflow: hidden;
+        }
+        
+        .quick-actions {
+            position: absolute !important;  
+            top: 0 !important;              
+            left: 0 !important;
+            width: 100% !important;         
+            height: 45px !important;        
+            background: transparent !important; 
+            border-bottom: none !important; 
+            display: flex !important; 
+            justify-content: center !important; 
+            gap: 15px !important;               
+            padding-top: 8px !important;        
+            z-index: 999 !important;            
+        }
+        .quick-btn { 
+            border: none; 
+            cursor: pointer; 
+            flex: none; 
+            width: 200px;   
+            height: 80px;  
+            color: white; 
+            font-weight: bold; 
+            font-size: 14px; 
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain; 
+        }
+        .quick-btn:hover { filter: brightness(1.2); }
+        
+        .small-table-body {
+            position: relative !important;
+            flex: 1; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; cursor: pointer; transition: all 0.3s ease;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+        }
+        .small-table-body:hover { filter: brightness(1.1); }
+        .small-table-title { font-size: 16px; font-weight: bold; margin-bottom: 3px; }
+        .auto-tag { color: #2f3; font-size: 12px; margin-left: 5px; }
+
+        .bottom-control-bar {
+            height: 115px; position: absolute; bottom: 25px; right: 25px; z-index: 999; 
+            background: linear-gradient(to bottom, #7a3119, #471708); border: 4px solid #f29f05;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.9), inset 0 0 15px rgba(0,0,0,0.6); border-radius: 65px; 
+            display: inline-flex; align-items: center; padding: 0 35px; gap: 20px;
+        }
+        .action-buttons { display: flex; gap: 15px; }
+        .action-btn {
+            width: 95px; height: 80px; border-radius: 24px; border: 2px solid rgba(255,255,255,0.7);
+            color: #fff; font-size: 18px; font-weight: bold; cursor: pointer;
+            box-shadow: inset 0 5px 8px rgba(255,255,255,0.3), 0 4px 6px rgba(0,0,0,0.4);
+            display: flex; justify-content: center; align-items: center; text-align: center; line-height: 1.2;
+            transition: transform 0.1s, filter 0.2s; background: linear-gradient(to bottom, #38b000, #007200);
+        }
+        .action-btn:hover { filter: brightness(1.1); }
+        .action-btn:active { transform: scale(0.95); }
+
+        .timer-block {
+            background-color: #0d0d0d; border: 2px solid #333; border-radius: 18px;
+            width: 95px; height: 82px; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+        .timer-label { color: #ff3333; font-size: 13px; font-weight: bold; letter-spacing: 1px; margin-bottom: -2px; }
+        .timer-value { color: #ffff00; font-size: 44px; font-weight: bold; font-family: Arial, sans-serif; line-height: 1; }
+
+        .chip-selection { display: flex; gap: 12px; }
+        .chip {
+            width: 82px; height: 82px; border-radius: 50%; border: 4px dashed rgba(255,255,255,0.7); 
+            display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; 
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-shadow: 1px 1px 2px #000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+        }
+        .chip:hover { transform: scale(1.08); }
+        .chip.active { transform: scale(1.15); box-shadow: 0 0 20px #ffff00; border: 4px solid #ffff00; }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="tables-layout">
+            <div class="main-table-container" id="main-table-element">
+                <div class="main-table-header" id="main-table-title">主桌 - 桌號 A</div>
+                <div class="main-betting-areas">
+                    <div class="bet-zone player" onclick="handleMainTableClick('player')">
+                        <span></span>
+                        <div class="bet-amount" id="main-bet-player">0</div>
+                    </div>
+                    <div class="bet-zone tie" onclick="handleMainTableClick('tie')">
+                        <span></span>
+                        <div class="bet-amount" id="main-bet-tie">0</div>
+                    </div>
+                    <div class="bet-zone banker" onclick="handleMainTableClick('banker')">
+                        <span></span>
+                        <div class="bet-amount" id="main-bet-banker">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="small-tables-container">
+                <div class="small-table-slot">
+                    <div class="quick-actions" id="quick-actions-0">
+                        <button class="quick-btn p-btn" onclick="quickBet(0, 'player')"></button>
+                        <button class="quick-btn t-btn" onclick="quickBet(0, 'tie')"></button>
+                        <button class="quick-btn b-btn" onclick="quickBet(0, 'banker')"></button>
+                    </div>
+                    <div class="small-table-body" id="small-body-0" onclick="handleSmallTableClick(0)">
+                        <div class="small-table-title" id="slot-title-0">桌號 B</div>
+                        <div class="small-table-bets">
+                            <span class="small-bet-val p-color" id="small-bet-p-0">0</span>
+                            <span class="small-bet-val t-color" id="small-bet-t-0">0</span>
+                            <span class="small-bet-val b-color" id="small-bet-b-0">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="small-table-slot">
+                    <div class="quick-actions" id="quick-actions-1">
+                        <button class="quick-btn p-btn" onclick="quickBet(1, 'player')"></button>
+                        <button class="quick-btn t-btn" onclick="quickBet(1, 'tie')"></button>
+                        <button class="quick-btn b-btn" onclick="quickBet(1, 'banker')"></button>
+                    </div>
+                    <div class="small-table-body" id="small-body-1" onclick="handleSmallTableClick(1)">
+                        <div class="small-table-title" id="slot-title-1">桌號 C</div>
+                        <div class="small-table-bets">
+                            <span class="small-bet-val p-color" id="small-bet-p-1">0</span>
+                            <span class="small-bet-val t-color" id="small-bet-t-1">0</span>
+                            <span class="small-bet-val b-color" id="small-bet-b-1">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="small-table-slot">
+                    <div class="quick-actions" id="quick-actions-2">
+                        <button class="quick-btn p-btn" onclick="quickBet(2, 'player')"></button>
+                        <button class="quick-btn t-btn" onclick="quickBet(2, 'tie')"></button>
+                        <button class="quick-btn b-btn" onclick="quickBet(2, 'banker')"></button>
+                    </div>
+                    <div class="small-table-body" id="small-body-2" onclick="handleSmallTableClick(2)">
+                        <div class="small-table-title" id="slot-title-2">桌號 D</div>
+                        <div class="small-table-bets">
+                            <span class="small-bet-val p-color" id="small-bet-p-2">0</span>
+                            <span class="small-bet-val t-color" id="small-bet-t-2">0</span>
+                            <span class="small-bet-val b-color" id="small-bet-b-2">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-control-bar">
+            <div class="action-buttons">
+                <button class="action-btn" id="btn-auto" onclick="clickActionButton('auto')">自動<br>下注</button>
+                <button class="action-btn" id="btn-rebet" onclick="clickActionButton('rebet')">續押</button>
+                <button class="action-btn" id="btn-clear" onclick="clickActionButton('clear')">清除</button>
+                <button class="action-btn" id="btn-double" onclick="clickActionButton('double')">雙倍</button>
+            </div>
+
+            <div class="timer-block">
+                <div class="timer-label">TIME</div>
+                <div class="timer-value" id="timer-count">20</div>
+            </div>
+
+            <div class="chip-selection">
+                <div class="chip active" data-value="100" onclick="selectChip(100)">100</div>
+                <div class="chip" data-value="500" onclick="selectChip(500)">500</div>
+                <div class="chip" data-value="1000" onclick="selectChip(1000)">1000</div>
+                <div class="chip" data-value="5000" onclick="selectChip(5000)">5000</div>
+                <div class="chip" data-value="10000" onclick="selectChip(10000)">10000</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================================================
+        // 核心邏輯 JavaScript
+        // ==========================================================================
+        let tables = [
+            { id: 'A', name: '', isAuto: false, bets: { player: 0, tie: 0, banker: 0 }, lastBets: { player: 0, tie: 0, banker: 0 } },
+            { id: 'B', name: '', isAuto: false, bets: { player: 0, tie: 0, banker: 0 }, lastBets: { player: 0, tie: 0, banker: 0 } },
+            { id: 'C', name: '', isAuto: false, bets: { player: 0, tie: 0, banker: 0 }, lastBets: { player: 0, tie: 0, banker: 0 } },
+            { id: 'D', name: '', isAuto: false, bets: { player: 0, tie: 0, banker: 0 }, lastBets: { player: 0, tie: 0, banker: 0 } }
+        ];
+
+        let currentMainIndex = 0;
+        let currentSlotIndices = [1, 2, 3]; 
+        let selectedChipValue = 100;
+        let currentActionMode = null;
+
+        // 倒數計時計時器
+        setInterval(() => {
+            let timerEl = document.getElementById('timer-count');
+            let currentSec = parseInt(timerEl.innerText);
+            if(currentSec <= 1) { timerEl.innerText = 20; } else { timerEl.innerText = currentSec - 1; }
+        }, 1000);
+
+        function selectChip(value) {
+            selectedChipValue = value;
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.classList.remove('active');
+                if(parseInt(chip.getAttribute('data-value')) === value) { chip.classList.add('active'); }
+            });
+        }
+
+        function clickActionButton(action) {
+            if (currentActionMode === action) { currentActionMode = null; } else { currentActionMode = action; }
+            updateUI();
+        }
+
+        function executeActionOnTable(tableIndex) {
+            let targetTable = tables[tableIndex];
+            switch(currentActionMode) {
+                case 'clear':
+                    if (targetTable.bets.player > 0 || targetTable.bets.tie > 0 || targetTable.bets.banker > 0) {
+                        targetTable.lastBets = { ...targetTable.bets };
+                    }
+                    targetTable.bets = { player: 0, tie: 0, banker: 0 };
+                    break;
+                case 'double':
+                    targetTable.bets.player *= 2; targetTable.bets.tie *= 2; targetTable.bets.banker *= 2;
+                    break;
+                case 'rebet':
+                    targetTable.bets = { ...targetTable.lastBets };
+                    break;
+                case 'auto':
+                    targetTable.isAuto = !targetTable.isAuto;
+                    break;
+            }
+            updateUI();
+        }
+
+        function handleMainTableClick(type) {
+            if (currentActionMode) { executeActionOnTable(currentMainIndex); } 
+            else { tables[currentMainIndex].bets[type] += selectedChipValue; updateUI(); }
+        }
+
+        function handleSmallTableClick(slotIdx) {
+            if (currentActionMode) {
+                let tableIndex = currentSlotIndices[slotIdx];
+                executeActionOnTable(tableIndex);
+            } else {
+                let temp = currentMainIndex;
+                currentMainIndex = currentSlotIndices[slotIdx];
+                currentSlotIndices[slotIdx] = temp;
+                updateUI();
+            }
+        }
+
+        function quickBet(slotIdx, type) {
+            let tableIndex = currentSlotIndices[slotIdx];
+            tables[tableIndex].bets[type] += selectedChipValue;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active'));
+            if (currentActionMode) { document.getElementById(`btn-${currentActionMode}`).classList.add('active'); }
+
+            const mainTableEl = document.getElementById('main-table-element');
+            
+            // 1. 刷新主桌狀態
+            let mainTable = tables[currentMainIndex];
+            let mainState = 'normal';
+            if (currentActionMode) mainState = 'action';
+            else if (mainTable.isAuto) mainState = 'auto';
+            
+            mainTableEl.setAttribute('data-table', mainTable.id); 
+            mainTableEl.setAttribute('data-state', mainState);    
+
+            let mainAutoText = mainTable.isAuto ? ' <span class="auto-tag">(自動)</span>' : '';
+            document.getElementById('main-table-title').innerHTML = `主桌 - ${mainTable.name}${mainAutoText}`;
+            document.getElementById('main-bet-player').innerText = mainTable.bets.player;
+            document.getElementById('main-bet-tie').innerText = mainTable.bets.tie;
+            document.getElementById('main-bet-banker').innerText = mainTable.bets.banker;
+
+            // 2. 刷新子桌狀態
+            currentSlotIndices.forEach((tableIdx, slotIdx) => {
+                let targetTable = tables[tableIdx];
+                let smallBodyEl = document.getElementById(`small-body-${slotIdx}`);
+                
+                let smallState = 'normal';
+                if (currentActionMode) smallState = 'action';
+                else if (targetTable.isAuto) smallState = 'auto';
+                
+                smallBodyEl.setAttribute('data-table', targetTable.id); 
+                smallBodyEl.setAttribute('data-state', smallState);    
+
+                // 🔴 關鍵控制：有了更強力的 CSS Class，這裡就能順利拔掉按鈕了
+                let qaElement = document.getElementById(`quick-actions-${slotIdx}`);
+                if (qaElement) {
+                    if (targetTable.isAuto) {
+                        qaElement.classList.add('hide-auto-actions');
+                    } else {
+                        qaElement.classList.remove('hide-auto-actions');
+                    }
+                }
+
+                let smallAutoText = targetTable.isAuto ? ' <span class="auto-tag">(自動)</span>' : '';
+                document.getElementById(`slot-title-${slotIdx}`).innerHTML = `${targetTable.name}${smallAutoText}`;
+                
+                // 刷新子桌下注額數字
+                document.getElementById(`small-bet-p-${slotIdx}`).innerText = targetTable.bets.player;
+                document.getElementById(`small-bet-t-${slotIdx}`).innerText = targetTable.bets.tie;
+                document.getElementById(`small-bet-b-${slotIdx}`).innerText = targetTable.bets.banker;
+            });
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
